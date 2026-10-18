@@ -1,3 +1,4 @@
+
 from typing import List
 
 from data.connection import db_cursor
@@ -19,6 +20,22 @@ def follow(follower: User, followee: User):
         except UniqueViolation:
             # Already following - treat as idempotent request.
             pass
+
+
+def unfollow(follower: User, followee: User):
+    """Remove a follow relationship between two users."""
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            DELETE FROM follows
+            WHERE follower = %(follower_id)s
+              AND followee = %(followee_id)s
+            """,
+            {
+                "follower_id": follower.id,
+                "followee_id": followee.id,
+            },
+        )
 
 
 def get_followed_usernames(follower: User) -> List[str]:
